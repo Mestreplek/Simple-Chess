@@ -6,11 +6,7 @@ class Move: # just data.
 
 cord = tuple(int,int)
 
-class Piece: 
-    def __init__(self):
-        pass
-    def get_movable_moves(self,location) -> list[Move]: # movable_moves are moves wich are legall if you ignore checks
-        pass
+
 
 # Board does not store individual instances of "Piece" it only stores pointes to a piece
 class Board: # only data storage, writing reading
@@ -20,6 +16,9 @@ class Board: # only data storage, writing reading
         pass
     def write(self):
         pass
+
+
+
 
 class WinState(Enum):
     BLACK_WON = "Black won"
