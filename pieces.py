@@ -26,6 +26,7 @@ def add_cord(cord_1: Cord, cord_2: Cord):
     return (cord_1[0] + cord_2[0],cord_1[1] + cord_2[1])
 #endregion
 def rook(cord,Board):
+    moves = []
     offsets = [-1,1]
      for axe_iter in range(2):
         for off in offsets:
@@ -34,6 +35,10 @@ def rook(cord,Board):
                 move_to = cord
                 move_to[axe_iter] += off*step
                 if in_bounds(move_to):
+                    
+                    on_move_to = Board.read(move_to)
+                    if on_move_to = None:
+                        moves.append((on_move_to, 
                 
 def bishop(cord,Board):
     pass
