@@ -29,13 +29,22 @@ def add_cord(cord_1: Cord, cord_2: Cord):
 def pawn(cord,Board,self_color: Color):
     
     steps = 1
+    direction = 1
     double_rank = 1
     if self_color == Color.BLACK:
-        step = -1
         double_rank = 6
+        direction = -1
     
     if cord[1] == double_rank:
-        step *= 2
+        steps *= 2
+    
+    for step in range(1,3):
+        move_to = cord
+        move_to[1] += step * direction
+        
+        if in_bounds(move_to):
+            
+        
     
         
 
