@@ -26,6 +26,18 @@ def add_cord(cord_1: Cord, cord_2: Cord):
     return (cord_1[0] + cord_2[0],cord_1[1] + cord_2[1])
 #endregion
 
+def pawn(cord,Board,self_color: Color):
+    
+    steps = 1
+    double_rank = 1
+    if self_color == Color.BLACK:
+        step = -1
+        double_rank = 6
+    
+    if cord[1] == double_rank:
+        step *= 2
+    
+        
 
 def rook(cord,Board,self_color: Color):
     moves = []
