@@ -3,8 +3,6 @@ from pieces import ColorName
 from pieces import PieceName
 # tells where it can move to 
 # legality is handled with Game
-class Move: # just data.
-    pass
 
 cord = tuple(int,int)
 
@@ -36,15 +34,17 @@ class Board: # only data storage, writing reading
 
 
 class WinState(Enum):
-    BLACK_WON = "Black won"
-    WHITE_WON = "White won"
-    DRAW = "Draw"
-    ACTIV_GAME = "Activ game"
+    BLACK_WON = 0
+    WHITE_WON = 1
+    DRAW = 2
+    ACTIV_GAME = 3
 
 class ChessBoard: # handles legality, execution of moves, win condition. Dosent enforce anything just tells whats legal
     def __init__(self):
         pass
     def get_movable_moves(self) -> list[Move]:
+        pass
+    def get_legal_moves():
         pass
     def state_after_move(self,move: Move) -> "ChessBoard":
         pass
