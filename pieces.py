@@ -1,18 +1,20 @@
 from enum import Enum
 Cord = tuple[int,int] 
-class Color(Enum):
-    WHITE = "WHITE"
-    BLACK = "BLACK"
+class ColorName(Enum):
+    WHITE = 0
+    BLACK = 1
+    NONE = 2
 class PieceName(Enum):
-    ROOK = "Rook"
-    BISHOP = "BIshop"
-    QUEEN = "Queen"
-    PAWN = "Pawn"
-    KING = "King"
-    KNIGHT = "Knight"
+    ROOK = 6
+    BISHOP = 5
+    QUEEN = 4
+    PAWN = 3
+    KING = 2
+    KNIGHT = 1
+    NONE = 0
 
 
-Piece = dict[str:Color,str:PieceName]
+Piece = dict[str:ColorName,str:PieceName]
 Move = tuple[Cord,Cord,str] # str is for promotion
 #region Basic Functions
 
@@ -30,7 +32,7 @@ class square_reaction(Enum):
     STOP = "STOP"
     CAPTURE = "CAPTURE"
     CONTINUE = "CONTINUE"
-def check_square(square_cord,Board, self_color: Color):
+def check_square(square_cord,Board, self_color: ColorName):
     
     if in_bounds(square_cord):
         on_move_to = Board.read(square_cord)
@@ -44,7 +46,7 @@ def check_square(square_cord,Board, self_color: Color):
         return square_reaction.STOP
         
 
-def king(cord,Board,self_color: Color):
+def king(cord,Board,self_color: ColorName):
     moves = []
     offsets = [0,-1,1]
     for off_x in offsets:
@@ -64,13 +66,13 @@ def king(cord,Board,self_color: Color):
                 case square_reaction.CONTINUE:
                     moves.append(this_move)
     return moves
-def pawn(cord,Board,self_color: Color):
+def pawn(cord,Board,self_color: ColorName):
     no_promotion_moves = []
     #region just forward move
     
     steps = 1
     
-    if self_color == Color.BLACK:
+    if self_color == ColorName.BLACK:
         direction = -1
         double_rank = 6
         promotion_rank = 0
@@ -119,7 +121,7 @@ def pawn(cord,Board,self_color: Color):
             moves.append(np_move)
     #endregion
     return moves # (:
-def rook(cord,Board,self_color: Color):
+def rook(cord,Board,self_color: ColorName):
     moves = []
     offsets = [-1,1]
     for axe_iter in range(2):
@@ -143,7 +145,7 @@ def rook(cord,Board,self_color: Color):
 
 
     return moves                                     
-def bishop(cord,Board, self_color: Color):
+def bishop(cord,Board, self_color: ColorName):
     moves = []
     offsets = [-1,1]
     for off_x in offsets:
@@ -164,7 +166,7 @@ def bishop(cord,Board, self_color: Color):
                         moves.append(this_move)
                         continue
     return moves
-def queen(cord,Board, self_color: Color):
+def queen(cord,Board, self_color: ColorName):
     
     bishop_moves: list[Move] = bishop(cord,Board,self_color)
     rook_moves: list[Move] = rook(cord,Board,self_color)
@@ -172,7 +174,7 @@ def queen(cord,Board, self_color: Color):
     for rook_move in rook_moves:
         moves.append(rook_move)
     return moves 
-def knight(cord,Board,self_color: Color): # worth 3 pieces
+def knight(cord,Board,self_color: ColorName): # worth 3 pieces
 
     raw_raw_moves = []
     trunk_offsets = [-2,2]
