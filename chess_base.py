@@ -3,7 +3,7 @@ from pieces import ColorName
 from pieces import PieceName
 # tells where it can move to 
 # legality is handled with Game
-
+import pieces
 cord = tuple(int,int)
 
 
@@ -38,10 +38,14 @@ class WinState(Enum):
     WHITE_WON = 1
     DRAW = 2
     ACTIV_GAME = 3
-
+PieceName_to_movable_moves_func: dict = {
+    PieceName.ROOK:
+    # TODO 
+}
 class ChessBoard: # handles legality, execution of moves, win condition. Dosent enforce anything just tells whats legal
     def __init__(self,isNormalSetup = True):
-
+        self.turn_color: ColorName = ColorName.WHITE
+        
         if isNormalSetup == True:
             board = Board() 
             white_black_pawn_range = [1,6]
@@ -56,7 +60,18 @@ class ChessBoard: # handles legality, execution of moves, win condition. Dosent 
                     piece_cord = (white_black_[c],
                     board.writeSquare(piece_sequence[i],piece_cord,white_blak_color_name[c])
     def get_movable_moves(self) -> list[Move]:
-        pass
+        moves = []
+        for i in range(8)
+            for j in range(8)
+                cord = (i,j)
+
+                square: Square = self.board.readSquare(cord)
+            
+                if square.color_name == self.turn.color:
+                    movable_moves_func = PieceName_to_movable_moves_func[square.piece_name]
+                    moves = moves + movable_moves_func(self.Board,square.color_name)
+                
+        return moves
     def get_legal_moves():
         pass
     def state_after_move(self,move: Move) -> "ChessBoard":
