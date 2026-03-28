@@ -40,8 +40,21 @@ class WinState(Enum):
     ACTIV_GAME = 3
 
 class ChessBoard: # handles legality, execution of moves, win condition. Dosent enforce anything just tells whats legal
-    def __init__(self):
-        pass
+    def __init__(self,isNormalSetup = True):
+
+        if isNormalSetup == True:
+            board = Board() 
+            white_black_pawn_range = [1,6]
+            white_black_color_name = [ColorName.WHITE,ColorName.BLACK]
+            
+            white_black_king_range = [0,7]
+            piece_sequence = [PieceName.ROOK,PieceName.KNIGHT,PieceName.BISHOP,PieceName.KING,PieceName.QUEEN,PieceName.BISHOP,PieceName.KNIGHT,PieceName.ROOK]
+            for i in range(8):
+                for c in range(2)
+                    pawn_cord = (white_black_pawwn_range[c],i)
+                    board.writeSquare(PieceName.PAWN,pawn_cord,white_black_color_name[c])
+                    piece_cord = (white_black_[c],
+                    board.writeSquare(piece_sequence[i],piece_cord,white_blak_color_name[c])
     def get_movable_moves(self) -> list[Move]:
         pass
     def get_legal_moves():
