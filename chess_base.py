@@ -36,8 +36,8 @@ class Board: # only data storage of pieces, writing reading
 
 
 class WinState(Enum):
-    BLACK_WON = 0
-    WHITE_WON = 1
+    BLACK_WON = ColorName.BLACK
+    WHITE_WON = ColorName.WHITE
     DRAW = 2
     ACTIV_GAME = 3
 PieceName_to_movable_moves_func: dict = {
@@ -74,9 +74,9 @@ def get_board_after_move(board: Board,move: Move):
 
 def is_attacked(board: Board, cord, attacked_color: ColorName):
     
-    moving_PieceName: PieceName 
+    make_move_PieceName: PieceName 
     movable_moves_func: function 
-    for moving_PieceName, movable_moves_func in PieceName_to_movable_moves_func.items():
+    for make_move_PieceName, movable_moves_func in PieceName_to_movable_moves_func.items():
         
         movable_moves = movable_moves_func(cord=cord,board=board,self_color=attacked_color)
         
@@ -89,10 +89,10 @@ def is_attacked(board: Board, cord, attacked_color: ColorName):
             
             if destination_piece.color_name == ColorName.NONE:
                 continue
-            elif destination_piece.color_name != attacked_color:
-                if destination_piece.piece_name == moving_PieceName:
+            elif destination_piece.color_name != attacked_color: # this is redundant 
+                if destination_piece.piece_name == make_move_PieceName:
                     return True
-                if moving_PieceName.piece_name == PieceName.ROOK or moving_PieceName.piece_name == PieceName.BISHOP:
+                if make_move_PieceName == PieceName.ROOK or make_move_PieceName == PieceName.BISHOP:
                     if  destination_piece.piece_name == PieceName.QUEEN:
                         return True
     
@@ -126,7 +126,16 @@ def isBoardLegal(board: Board,turn_color: ColorName)->bool:
 
     
     return True
-    
+def isInCheck(board: Board, turn_color: ColorName) -> bool: 
+    king_cord: tuple[int,int]
+    for i in range(8):
+        for j in range(8):
+            cord = (i,j)
+            square: Square = board.readSquare(cord=cord)
+            if square.piece_name == PieceName.KING and square.color_name == turn_color:
+                king_cord = cord
+                break
+    return is_attacked(board=board,cord=king_cord,attacked_color=turn_color)
 class ChessBoard: # handles legality, execution of moves, win condition. Dosent enforce anything just tells whats legal
     def __init__(self,isNormalSetup = True):
         self.turn_color: ColorName = ColorName.WHITE
@@ -171,5 +180,15 @@ class ChessBoard: # handles legality, execution of moves, win condition. Dosent 
         pass
     def do_next_state(self,move: Move) -> None:
         self = self.ChessBoard_after_move(move=move)
-    def winner() -> WinState:
-        pass 
+    def getWinState(self) -> WinState:
+        #1 checks if no moves are avaible for
+        
+        legal_moves = self.get_legal_moves()
+        if len(legal_moves) == 0:
+            if isInCheck(board=self.board,turn_color=self.turn_color):
+                win_state = self.turn_color
+            else:
+                win_state = WinState.DRAW
+        else:
+            win_state = WinState.ACTIV_GAME
+        return win_state
