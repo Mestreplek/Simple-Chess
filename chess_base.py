@@ -10,13 +10,9 @@ cord = tuple[int,int]
 
 
 class Piece:
-    def __init__(self,piece_name: PieceName=None,color_name: ColorName=None):
-        
-        if ((piece_name == None) and( color_name == None)) or ((piece_name != None) and (color_name != None)):
-            self.piece_name = piece_name
-            self.color_name = color_name
-        else:
-            raise "Square init error"
+    def __init__(self,piece_name: PieceName=PieceName.NONE,color_name: ColorName=ColorName.NONE):
+        self.piece_name = piece_name
+        self.color_name = color_name 
 # Board does not store individual instances of "Piece" it only stores pointes to a piece
 class Board: # only data storage of pieces, writing reading
     def __init__(self,data=None):
@@ -204,5 +200,3 @@ class ChessBoard: # handles legality, execution of moves, win condition. Dosent 
 
 
 my_ChessBoard = ChessBoard()
-print(my_ChessBoard.board.readSquare((0,1)).piece_name)
-# print(my_ChessBoard.get_legal_moves())

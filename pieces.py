@@ -36,7 +36,7 @@ def check_square(square_cord,board, self_color: ColorName):
     
     if in_bounds(square_cord):
         on_move_to = board.readSquare(square_cord)
-        if on_move_to == None:
+        if on_move_to.piece_name == PieceName.NONE:
             return square_reaction.CONTINUE
         elif on_move_to.color_name != self_color:
             return square_reaction.CAPTURE
@@ -44,8 +44,6 @@ def check_square(square_cord,board, self_color: ColorName):
             return square_reaction.STOP
     else:
         return square_reaction.STOP
-        
-
 def get_king_movable_moves(cord,board,self_color: ColorName):
     moves = []
     offsets = [0,-1,1]
@@ -180,7 +178,7 @@ def get_queen_movable_moves(cord,board, self_color: ColorName):
     return moves 
 def get_knight_movable_moves(cord,board,self_color: ColorName): # worth 3 pieces
 
-    raw_raw_moves = []
+    moves = []
     trunk_offsets = [-2,2]
     branch_offsets = [-1,1]
     for ax_iter in range(2):
@@ -189,16 +187,12 @@ def get_knight_movable_moves(cord,board,self_color: ColorName): # worth 3 pieces
                 destination = list(cord)
                 destination[ax_iter] += trunk_off
 
-                destination[int((1-ax_iter)==1)] += branch_off
-                raw_raw_moves.append((cord,destination))
-    raw_moves = []
-    for move in raw_raw_moves:
-        if in_bounds(move[1]):
-            raw_moves.append(move)
+                other_ax = int((1-ax_iter)==1)
+                destination[other_ax] += branch_off
 
-    
-    moves = []
-    for move in raw_moves:
-        if board.readSquare(move[1]).color_name != self_color:
-            moves.append(move)
+                move = (cord,destination)
+                piece_on_destination = board.readSquare(destination)
+                print()
+                if in_bounds(destination) and (piece_on_destination.color_name != self_color):
+                    moves.append(move)
     return moves
