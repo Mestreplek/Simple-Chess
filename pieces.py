@@ -32,13 +32,13 @@ class square_reaction(Enum):
     STOP = "STOP"
     CAPTURE = "CAPTURE"
     CONTINUE = "CONTINUE"
-def check_square(square_cord,Board, self_color: ColorName):
+def check_square(square_cord,board, self_color: ColorName):
     
     if in_bounds(square_cord):
-        on_move_to = Board.read(square_cord)
+        on_move_to = board.readSquare(square_cord)
         if on_move_to == None:
             return square_reaction.CONTINUE
-        elif on_move_to.color != self_color:
+        elif on_move_to.color_name != self_color:
             return square_reaction.CAPTURE
         else:
             return square_reaction.STOP
@@ -46,19 +46,19 @@ def check_square(square_cord,Board, self_color: ColorName):
         return square_reaction.STOP
         
 
-def king(cord,Board,self_color: ColorName):
+def get_king_movable_moves(cord,board,self_color: ColorName):
     moves = []
     offsets = [0,-1,1]
     for off_x in offsets:
         for off_y in offsets:
             if (off_x == off_y) and off_y == 0:
                 continue
-            move_to = cord
+            move_to = list(cord)
             move_to[0] += off_x
             move_to[1] += off_y
 
             this_move = (cord,move_to)
-            match check_square(move_to,Board=Board,self_color=self_color):
+            match check_square(move_to,board=board,self_color=self_color):
                 case square_reaction.STOP:
                     continue
                 case square_reaction.CAPTURE:
@@ -66,7 +66,7 @@ def king(cord,Board,self_color: ColorName):
                 case square_reaction.CONTINUE:
                     moves.append(this_move)
     return moves
-def pawn(cord,Board,self_color: ColorName):
+def get_pawn_movable_moves(cord,board,self_color: ColorName):
     no_promotion_moves = []
     #region just forward move
     
@@ -84,29 +84,33 @@ def pawn(cord,Board,self_color: ColorName):
     if cord[1] == double_rank:
         steps *= 2
     
-    for step in range(1,3):
-        move_to = cord
+    for step in range(1,steps+1):
+        move_to = list(cord)
         move_to[1] += step * direction
         
         
         if in_bounds(move_to):
-            if Board.read(move_to) == None:
-                this_move = (cord,move_to)
-                no_promotion_moves.append(tuple([this_move]))
+            if board.readSquare(move_to).piece_name == PieceName.NONE:
+                this_move = [cord,move_to]
+                no_promotion_moves.append(this_move)
     #endregion
     #region attack
     left_right_offsets = [-1,1]
     for offset in left_right_offsets:
-        move_to = cord 
+        move_to = list(cord) 
         
         
         move_to[0] += direction
-        move_to[1] += left_right_offsets
-        on_move_to = Board.read(move_to)
-        this_move = (cord,move_to)
-        if in_bounds(move_to) and on_move_to != None:
-            if on_move_to.color != self_color:
-                no_promotion_moves.append(this_move)
+        move_to[1] += offset
+        
+        
+        if in_bounds(move_to):
+            
+            on_move_to = board.readSquare(move_to)
+            if on_move_to.piece_name != PieceName.NONE:
+                if on_move_to.color_name != self_color:
+                    this_move = (cord,move_to)
+                    no_promotion_moves.append(this_move)
     #endregion
     #region promotion
     moves = []
@@ -121,19 +125,19 @@ def pawn(cord,Board,self_color: ColorName):
             moves.append(np_move)
     #endregion
     return moves # (:
-def rook(cord,Board,self_color: ColorName):
+def get_rook_movable_moves(cord,board,self_color: ColorName):
     moves = []
     offsets = [-1,1]
-    for axe_iter in range(2):
+    for axe_iter in range(2): # cord[axe_iter]
         for off in offsets:
             for step in range(8):
                 
-                move_to = cord
+                move_to = list(cord)
                 move_to[axe_iter] += off*step
                 if in_bounds(move_to):
                     this_move = (cord, move_to)
                     
-                    match check_square(move_to,Board=Board,self_color=self_color):
+                    match check_square(move_to,board=board,self_color=self_color):
                         case square_reaction.STOP:
                             break
                         case square_reaction.CAPTURE:
@@ -145,18 +149,18 @@ def rook(cord,Board,self_color: ColorName):
 
 
     return moves                                     
-def bishop(cord,Board, self_color: ColorName):
+def get_bishop_movable_moves(cord,board, self_color: ColorName):
     moves = []
     offsets = [-1,1]
     for off_x in offsets:
         for off_y in offsets:
             for step in range(8):
-                move_to = cord
+                move_to = list(cord)
                 move_to[0] += step * off_x
                 move_to[1] += step * off_y
                 
                 this_move = (cord, move_to)
-                match check_square(move_to,Board=Board,self_color=self_color):
+                match check_square(move_to,board=board,self_color=self_color):
                     case square_reaction.STOP:
                         break
                     case square_reaction.CAPTURE:
@@ -166,15 +170,15 @@ def bishop(cord,Board, self_color: ColorName):
                         moves.append(this_move)
                         continue
     return moves
-def queen(cord,Board, self_color: ColorName):
+def get_queen_movable_moves(cord,board, self_color: ColorName):
     
-    bishop_moves: list[Move] = bishop(cord,Board,self_color)
-    rook_moves: list[Move] = rook(cord,Board,self_color)
+    bishop_moves: list[Move] = get_bishop_movable_moves(cord,board,self_color)
+    rook_moves: list[Move] = get_rook_movable_moves(cord,board,self_color)
     moves: list[Move] = bishop_moves
     for rook_move in rook_moves:
         moves.append(rook_move)
     return moves 
-def knight(cord,Board,self_color: ColorName): # worth 3 pieces
+def get_knight_movable_moves(cord,board,self_color: ColorName): # worth 3 pieces
 
     raw_raw_moves = []
     trunk_offsets = [-2,2]
@@ -182,25 +186,19 @@ def knight(cord,Board,self_color: ColorName): # worth 3 pieces
     for ax_iter in range(2):
         for trunk_off in trunk_offsets:
             for branch_off in branch_offsets:
-                destination = cord
+                destination = list(cord)
                 destination[ax_iter] += trunk_off
 
                 destination[int((1-ax_iter)==1)] += branch_off
                 raw_raw_moves.append((cord,destination))
     raw_moves = []
     for move in raw_raw_moves:
-        if in_bounds(move[0]):
+        if in_bounds(move[1]):
             raw_moves.append(move)
 
     
     moves = []
     for move in raw_moves:
-        if Board.read(move[1])["color"] != self_color:
+        if board.readSquare(move[1]).color_name != self_color:
             moves.append(move)
     return moves
- 
-    
-
-                
-
-              

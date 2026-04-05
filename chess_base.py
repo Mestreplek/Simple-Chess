@@ -5,14 +5,14 @@ from pieces import Move
 from copy import deepcopy
 # tells where it can move to 
 # legality is handled with Game
-import pieces
-cord = tuple(int,int)
+
+cord = tuple[int,int]
 
 
-class Square:
+class Piece:
     def __init__(self,piece_name: PieceName=None,color_name: ColorName=None):
         
-        if ((piece_name == None) and( color_name == None)) or ((piece_name != None) and (color_name != None))
+        if ((piece_name == None) and( color_name == None)) or ((piece_name != None) and (color_name != None)):
             self.piece_name = piece_name
             self.color_name = color_name
         else:
@@ -24,13 +24,13 @@ class Board: # only data storage of pieces, writing reading
         if data == None:
             self.data = []
             for i in range(side_length):
-                self.data.append([Square() for i in range(side_length)])
+                self.data.append([Piece() for i in range(side_length)])
         else:
             self.data = data 
     def readSquare(self,cord):
         return self.data[cord[0]][cord[1]]
     def writeSquare(self,piece_name: PieceName,cord,color_name: ColorName):
-        self.data[cord[0]][cord[1]] = Square(piece_name,color_name)
+        self.data[cord[0]][cord[1]] = Piece(piece_name,color_name)
 
 
 
@@ -40,22 +40,29 @@ class WinState(Enum):
     WHITE_WON = ColorName.WHITE
     DRAW = 2
     ACTIV_GAME = 3
+from pieces import get_rook_movable_moves
+from pieces import get_king_movable_moves
+from pieces import get_queen_movable_moves
+from pieces import get_knight_movable_moves
+from pieces import get_pawn_movable_moves
+from pieces import get_bishop_movable_moves 
 PieceName_to_movable_moves_func: dict = {
-    1:1
-    # TODO 
+    PieceName.ROOK: get_rook_movable_moves,
+    PieceName.BISHOP: get_bishop_movable_moves,
+    PieceName.QUEEN: get_queen_movable_moves,
+    PieceName.PAWN: get_pawn_movable_moves,
+    PieceName.KING: get_king_movable_moves,
+    PieceName.KNIGHT: get_knight_movable_moves,
 }
-
-
-
 def get_board_after_move(board: Board,move: Move):
     
     moving_Square_cord = move[0]
 
 
-    moving_Square: Square = board.readSquare(moving_Square_cord)
+    moving_Square: Piece = board.readSquare(moving_Square_cord)
     
     
-    if len(Move) == 3: 
+    if len(move) == 3: 
         moving_Square.piece_name = move[2] # is a promoting pawn
     
 
@@ -70,8 +77,6 @@ def get_board_after_move(board: Board,move: Move):
 
 
     return board
-
-
 def is_attacked(board: Board, cord, attacked_color: ColorName):
     
     make_move_PieceName: PieceName 
@@ -85,7 +90,7 @@ def is_attacked(board: Board, cord, attacked_color: ColorName):
             
             destination_cord = move[1]
 
-            destination_piece: Square = board.readSquare(destination_cord)
+            destination_piece: Piece = board.readSquare(destination_cord)
             
             if destination_piece.color_name == ColorName.NONE:
                 continue
@@ -103,12 +108,12 @@ def isBoardLegal(board: Board,turn_color: ColorName)->bool:
     white_kings: int = 0 
     black_kings: int = 0
 
-    not_moiving_king: Square
+    not_moiving_king: Piece
     not_moiving_king_cord: tuple[int,int]
     for i in range(8):
         for j in range(8):
             cord = (i,j)
-            square: Square = board.readSquare(cord=cord)
+            square: Piece = board.readSquare(cord=cord)
             
             if square.piece_name == PieceName.KING:
                 if square.color_name == ColorName.WHITE:
@@ -131,7 +136,7 @@ def isInCheck(board: Board, turn_color: ColorName) -> bool:
     for i in range(8):
         for j in range(8):
             cord = (i,j)
-            square: Square = board.readSquare(cord=cord)
+            square: Piece = board.readSquare(cord=cord)
             if square.piece_name == PieceName.KING and square.color_name == turn_color:
                 king_cord = cord
                 break
@@ -140,30 +145,30 @@ class ChessBoard: # handles legality, execution of moves, win condition. Dosent 
     def __init__(self,isNormalSetup = True):
         self.turn_color: ColorName = ColorName.WHITE
         
-        if isNormalSetup == True:
-            board = Board() 
-            white_black_pawn_range = [1,6]
-            white_black_color_name = [ColorName.WHITE,ColorName.BLACK]
-            
-            white_black_king_range = [0,7]
-            piece_sequence = [PieceName.ROOK,PieceName.KNIGHT,PieceName.BISHOP,PieceName.KING,PieceName.QUEEN,PieceName.BISHOP,PieceName.KNIGHT,PieceName.ROOK]
-            for i in range(8):
-                for color_iter in range(2):
-                    pawn_cord = (i,white_black_pawn_range[color_iter])
-                    board.writeSquare(PieceName.PAWN,pawn_cord,white_black_color_name[color_iter])
-                    piece_cord = (i,white_black_king_range[color_iter]) 
-                    board.writeSquare(piece_sequence[i],piece_cord,white_black_color_name[color_iter])
+        
+        self.board = Board() 
+        white_black_pawn_range = [1,6]
+        white_black_color_name = [ColorName.WHITE,ColorName.BLACK]
+        
+        white_black_king_range = [0,7]
+        piece_sequence = [PieceName.ROOK,PieceName.KNIGHT,PieceName.BISHOP,PieceName.KING,PieceName.QUEEN,PieceName.BISHOP,PieceName.KNIGHT,PieceName.ROOK]
+        for i in range(8):
+            for color_iter in range(2):
+                pawn_cord = (i,white_black_pawn_range[color_iter])
+                self.board.writeSquare(PieceName.PAWN,pawn_cord,white_black_color_name[color_iter])
+                piece_cord = (i,white_black_king_range[color_iter]) 
+                self.board.writeSquare(piece_sequence[i],piece_cord,white_black_color_name[color_iter])
     def get_movable_moves(self) -> list[Move]:
         moves = []
         for i in range(8):
             for j in range(8):
                 cord = (i,j)
 
-                square: Square = self.board.readSquare(cord)
+                square: Piece = self.board.readSquare(cord)
             
-                if square.color_name == self.turn.color:
+                if square.color_name == self.turn_color:
                     movable_moves_func = PieceName_to_movable_moves_func[square.piece_name]
-                    moves = moves + movable_moves_func(self.Board,square.color_name)
+                    moves = moves + movable_moves_func(cord,self.board,square.color_name)
                 
         return moves
     def get_legal_moves(self):
@@ -172,14 +177,17 @@ class ChessBoard: # handles legality, execution of moves, win condition. Dosent 
         movable_moves = self.get_movable_moves()
         for move in movable_moves:
 
-            board_after_move: Board = get_board_after_move(board=self.board,move=move)
+            board_after_move: Board = get_board_after_move(board=deepcopy(self.board),move=move)
             if isBoardLegal(board=board_after_move,turn_color=self.turn_color):
                 legal_moves.append(move)
         return legal_moves
-    def ChessBoard_after_move(self,move: Move) -> "ChessBoard":
-        pass
-    def do_next_state(self,move: Move) -> None:
-        self = self.ChessBoard_after_move(move=move)
+    def apply_move(self,move: Move) -> None:
+        get_board_after_move(board=self.board,move=move)
+
+        if self.turn_color == ColorName.WHITE:
+            self.turn_color == ColorName.BLACK
+        else:
+            self.turn_color == ColorName.WHITE 
     def getWinState(self) -> WinState:
         #1 checks if no moves are avaible for
         
@@ -192,3 +200,9 @@ class ChessBoard: # handles legality, execution of moves, win condition. Dosent 
         else:
             win_state = WinState.ACTIV_GAME
         return win_state
+
+
+
+my_ChessBoard = ChessBoard()
+print(my_ChessBoard.board.readSquare((0,1)).piece_name)
+# print(my_ChessBoard.get_legal_moves())
