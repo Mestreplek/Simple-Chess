@@ -3,6 +3,7 @@ from pieces import ColorName
 from pieces import PieceName
 from pieces import Move
 from copy import deepcopy
+from pieces import get_opposite_color 
 # tells where it can move to 
 # legality is handled with Game
 
@@ -180,11 +181,8 @@ class ChessBoard: # handles legality, execution of moves, win condition. Dosent 
     def apply_move(self,move: Move) -> None:
         get_board_after_move(board=self.board,move=move)
 
-        if self.turn_color == ColorName.WHITE:
-            self.turn_color == ColorName.BLACK
-        else:
-            self.turn_color == ColorName.WHITE 
-    def getWinState(self) -> WinState:
+        self.turn_color = get_opposite_color(self.turn_color)
+    def getWinState(self) -> WinState: # TODO draw because of not enough material
         #1 checks if no moves are avaible for
         
         legal_moves = self.get_legal_moves()
@@ -200,3 +198,30 @@ class ChessBoard: # handles legality, execution of moves, win condition. Dosent 
 
 
 my_ChessBoard = ChessBoard()
+import random
+for n in range(402):
+
+
+    if my_ChessBoard.getWinState() != WinState.ACTIV_GAME:
+        print(my_ChessBoard.getWinState())
+        break
+    legal_moves = my_ChessBoard.get_legal_moves()
+    chosen_move = random.choice(legal_moves)
+
+    my_ChessBoard.apply_move(move=chosen_move)
+
+    piece_board = []    
+    for i in range(8):
+        row = []
+        for j in range(8):
+            cord = (j,i)
+            row.append(str(my_ChessBoard.board.readSquare(cord=cord).piece_name))
+        piece_board.append(row)
+        print(row)
+    print("----------------------------")
+    
+    # print(get_rook_movable_moves(cord=(0,0),board=my_ChessBoard.board,self_color=my_ChessBoard.turn_color))
+
+
+    # pri(piece_board[0][0])
+print(n)

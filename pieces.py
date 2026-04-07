@@ -13,7 +13,11 @@ class PieceName(Enum):
     KNIGHT = 1
     NONE = 0
 
-
+def get_opposite_color(color:ColorName) -> ColorName:
+        if color == ColorName.WHITE:
+            return ColorName.BLACK
+        else:
+            return ColorName.WHITE 
 Piece = dict[str:ColorName,str:PieceName]
 Move = tuple[Cord,Cord,str] # str is for promotion
 #region Basic Functions
@@ -37,8 +41,8 @@ def check_square(square_cord,board, self_color: ColorName):
     if in_bounds(square_cord):
         on_move_to = board.readSquare(square_cord)
         if on_move_to.piece_name == PieceName.NONE:
-            return square_reaction.CONTINUE
-        elif on_move_to.color_name != self_color:
+            return square_reaction.CONTINUE 
+        elif on_move_to.color_name == get_opposite_color(self_color):
             return square_reaction.CAPTURE
         else:
             return square_reaction.STOP
@@ -67,7 +71,7 @@ def get_king_movable_moves(cord,board,self_color: ColorName):
 def get_pawn_movable_moves(cord,board,self_color: ColorName):
     no_promotion_moves = []
     #region just forward move
-    
+    cord = list(cord)
     steps = 1
     
     if self_color == ColorName.BLACK:
@@ -114,13 +118,13 @@ def get_pawn_movable_moves(cord,board,self_color: ColorName):
     moves = []
 
     promotion_options = [PieceName.ROOK,PieceName.BISHOP,PieceName.KNIGHT,PieceName.QUEEN]
-    for np_move in no_promotion_moves:
-        if np_move[1][1] == promotion_rank:
+    for no_promotion_move in no_promotion_moves:
+        if no_promotion_move[1][1] == promotion_rank:
             
             for option in promotion_options:
-                moves.append((np_move + (option)))
+                moves.append((list(no_promotion_move )+ [option]))
         else:
-            moves.append(np_move)
+            moves.append(no_promotion_move)
     #endregion
     return moves # (:
 def get_rook_movable_moves(cord,board,self_color: ColorName):
@@ -128,7 +132,7 @@ def get_rook_movable_moves(cord,board,self_color: ColorName):
     offsets = [-1,1]
     for axe_iter in range(2): # cord[axe_iter]
         for off in offsets:
-            for step in range(8):
+            for step in range(1,8):
                 
                 move_to = list(cord)
                 move_to[axe_iter] += off*step
@@ -152,7 +156,7 @@ def get_bishop_movable_moves(cord,board, self_color: ColorName):
     offsets = [-1,1]
     for off_x in offsets:
         for off_y in offsets:
-            for step in range(8):
+            for step in range(1,8):
                 move_to = list(cord)
                 move_to[0] += step * off_x
                 move_to[1] += step * off_y
@@ -191,8 +195,11 @@ def get_knight_movable_moves(cord,board,self_color: ColorName): # worth 3 pieces
                 destination[other_ax] += branch_off
 
                 move = (cord,destination)
-                piece_on_destination = board.readSquare(destination)
-                print()
-                if in_bounds(destination) and (piece_on_destination.color_name != self_color):
-                    moves.append(move)
+                
+                
+                if in_bounds(destination):
+                    piece_on_destination = board.readSquare(destination)
+                    if (piece_on_destination.color_name != self_color):
+
+                        moves.append(move)
     return moves
